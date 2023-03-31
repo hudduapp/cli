@@ -1,7 +1,7 @@
 from getpass import getpass
 
 import typer
-from rich import print as pprint
+from rich import print
 
 from api.utils import ApiClient
 from utils.permanent_storage import read_field, set_field, unset_field
@@ -22,7 +22,7 @@ auth_api = ApiClient(
 def login():
     token = read_field("token")
     if token:
-        pprint(
+        print(
             f"You're already logged in. if you want to change accounts please log out first"
         )
     else:
@@ -33,8 +33,10 @@ def login():
             "POST", "/login", body={"login": login, "password": password}
         )
 
+        print(res)
+
         set_field("token", res["token"])
-        pprint(f"[green]✨ successfully logged in as {login} [/green]")
+        print(f"[green]✨ successfully logged in as {login} [/green]")
 
 
 @app.command()
@@ -43,10 +45,10 @@ def logout():
     if token:
         core_api.request("DELETE", "/me/tokens", body={"token": token})
 
-        pprint(f"[green]Successfully logged out[/green]")
         unset_field("token")
+        print(f"[green]Successfully logged out[/green]")
     else:
-        pprint(f"You're already logged out. To login run [bold]huddu auth login[/bold]")
+        print(f"You're already logged out. To login run [bold]huddu auth login[/bold]")
 
 
 if __name__ == "__main__":

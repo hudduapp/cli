@@ -9,7 +9,7 @@ class ApiClient:
         self.headers = headers
 
     def request(
-        self, method: str, path: str, body: dict = None, params: dict = None
+            self, method: str, path: str, body: dict = None, params: dict = None
     ) -> dict:
         res = requests.request(
             method,
@@ -18,6 +18,7 @@ class ApiClient:
             data=json.dumps(body) if not method == "GET" else None,
             params=params,
         )
+
         try:
             return res.json()
         except:
