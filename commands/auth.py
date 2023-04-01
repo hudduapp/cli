@@ -33,8 +33,6 @@ def login():
             "POST", "/login", body={"login": login, "password": password}
         )
 
-        print(res)
-
         set_field("token", res["token"])
         print(f"[green]✨ successfully logged in as {login} [/green]")
 
