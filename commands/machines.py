@@ -100,10 +100,10 @@ def list(
 
 @app.command()
 def connect(
-        machine_id: str
+        machine_name: str
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and name:{machine_name}&limit=1")
 
     machine_resource = res.get("data")[0]
 
@@ -122,10 +122,10 @@ def connect(
 
 @app.command()
 def info(
-        machine_id: str, show_ssh: bool = False
+        machine_name: str, show_ssh: bool = False
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and name:{machine_name}&limit=1")
 
     machine_resource = res.get("data")[0]
     if not show_ssh:
@@ -136,10 +136,10 @@ def info(
 
 @app.command()
 def suspend(
-        machine_id: str
+        machine_name: str
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and name:{machine_name}&limit=1")
 
     machine_resource = res.get("data")[0]
 
@@ -153,10 +153,10 @@ def suspend(
 
 @app.command()
 def resume(
-        machine_id: str
+        machine_name: str
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and name:{machine_name}&limit=1")
 
     machine_resource = res.get("data")[0]
 
@@ -169,14 +169,14 @@ def resume(
 
 
 @app.command()
-def delete_machine(
-        machine_id: str,
+def delete(
+        machine_name: str,
         confirm_deletion: str = typer.Option(...,
                                              prompt="Are you sure? (y/n)")
 ):
     if confirm_deletion == "y":
         res = core_api.request("GET",
-                               f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
+                               f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and name:{machine_name}&limit=1")
 
         machine_resource = res.get("data")[0]
 

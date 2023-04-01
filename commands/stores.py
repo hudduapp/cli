@@ -75,30 +75,30 @@ def list(
 
 @app.command()
 def info(
-        store_id: str, show_secret: bool = False
+        store_name: str, show_management_token: bool = False
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and id:{store_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1")
 
     store_resource = res.get("data")[0]
-    if not show_secret:
+    if not show_management_token:
         store_resource["management_token"] = "*****"
 
     print(store_resource)
 
 
 @app.command()
-def get(
-        store_id: str,
+def entries_get(
+        store_name: str,
         key: str
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and id:{store_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1")
     store_resource = res["data"][0]
 
-    store_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
+    stores_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
 
-    res = store_api.request("GET", f"documents?keys={key}")
+    res = stores_api.request("GET", f"documents?keys={key}")
     if len(res.get("data")) > 0:
         print(res.get("data")[0])
     else:
@@ -106,22 +106,22 @@ def get(
 
 
 @app.command()
-def set(
-        store_id: str,
+def entries_set(
+        store_name: str,
         key: str,
         value: str = typer.Option(..., prompt=True),
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and id:{store_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1")
     store_resource = res["data"][0]
 
-    store_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
+    stores_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
 
-    res = store_api.request("GET", f"documents?keys={key}")
+    res = stores_api.request("GET", f"documents?keys={key}")
     if len(res.get("data")) > 0:
         print(f"[red]Entry with key {key} already exists use [bold]huddu stores update[/bold] instead[/red]")
 
-    store_api.request("POST", f"documents", body={
+    stores_api.request("POST", f"documents", body={
         "key": key,
         "value": value
     })
@@ -130,17 +130,17 @@ def set(
 
 
 @app.command()
-def update(
-        store_id: str,
+def entries_update(
+        store_name: str,
         key: str, value: str = typer.Option(..., prompt=True),
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and id:{store_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1")
     store_resource = res["data"][0]
 
-    store_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
+    stores_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
 
-    store_api.request("POST", f"documents", body={
+    stores_api.request("POST", f"documents", body={
         "key": key,
         "value": value
     })
@@ -149,17 +149,17 @@ def update(
 
 
 @app.command()
-def delete(
-        store_id: str,
+def entries_delete(
+        store_name: str,
         key: str
 ):
     res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and id:{store_id}&limit=1")
+                           f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1")
     store_resource = res["data"][0]
 
-    store_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
+    stores_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
 
-    store_api.request("DELETE", f"documents", body={
+    stores_api.request("DELETE", f"documents", body={
         "key": key
     })
 
@@ -167,18 +167,21 @@ def delete(
 
 
 @app.command()
-def delete_store(
-        store_id: str,
+def delete(
+        store_name: str,
         confirm_deletion: str = typer.Option(...,
                                              prompt="Are you sure? (y/n)")
 ):
     if confirm_deletion == "y":
         res = core_api.request("GET",
-                               f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and id:{store_id}&limit=1")
+                               f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1")
         store_resource = res["data"][0]
 
-        store_api = make_store_client(store_resource.get("client_id"), store_resource.get("management_token"))
-        store_api.request("POST", "delete", body={
+        stores_api = ApiClient(
+            f"https://store.huddu.io",
+            headers={"Authorization": f"Token {read_field('token')}"}
+        )
+        stores_api.request("DELETE", "delete", body={
             "resource": store_resource.get("id"),
             "project": project_id,
             "organization": organization_id
