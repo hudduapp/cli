@@ -56,8 +56,10 @@ def create(
             "hostname": hostname,
             "disk_size": disk_size
         })
-
-        print(res)
+        if res.get("error"):
+            print(res)
+        else:
+            print(f"[green]✨ Successfully created a new store [/green]")
 
 
 @app.command()
@@ -67,23 +69,23 @@ def list(
     res = core_api.request("GET",
                            f"/search?resource=resources&organization={organization_id}&q=type:machine%20$and%20project:{project_id}&limit=10&skip={skip}")
 
-    data = Table()
+    table = Table()
 
-    data.add_column(
+    table.add_column(
         "Name"
     )
-    data.add_column(
+    table.add_column(
         "Machine ID"
     )
-    data.add_column(
+    table.add_column(
         "Machine IP"
     )
-    data.add_column(
+    table.add_column(
         "Machine Type"
     )
 
     for i in res.get("data"):
-        data.add_row(
+        table.add_row(
             i.get("name"),
             i.get("id"),
             i.get("external_ip"),
@@ -91,7 +93,7 @@ def list(
         )
 
     if len(res.get("data")):
-        print(data)
+        print(table)
     else:
         print("No entries. You can create a new machine with huddu machines create")
 
@@ -167,14 +169,19 @@ def resume(
 
 
 @app.command()
-def delete(
-        machine_id: str
+def delete_machine(
+        machine_id: str,
+        confirm_deletion: str = typer.Option(...,
+                                             prompt="Are you sure? (y/n)")
 ):
-    res = core_api.request("GET",
-                           f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
+    if confirm_deletion == "y":
+        res = core_api.request("GET",
+                               f"/search?resource=resources&organization={organization_id}&q=type:machine $and project:{project_id} $and id:{machine_id}&limit=1")
 
-    machine_resource = res.get("data")[0]
+        machine_resource = res.get("data")[0]
 
-    print("[yellow]this action might take up to 20 seconds[/yellow]")
-    machines_api.request("POST", f"machines/{machine_resource.get('id')}/delete")
-    print("[red]Deleted the vm[/red]")
+        print("[yellow]this action might take up to 20 seconds[/yellow]")
+        machines_api.request("POST", f"machines/{machine_resource.get('id')}/delete")
+        print("[red]Deleted the vm[/red]")
+    else:
+        print("[red]Aborted deleting this machine[/red]")

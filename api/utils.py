@@ -11,6 +11,7 @@ class ApiClient:
     def request(
             self, method: str, path: str, body: dict = None, params: dict = None
     ) -> dict:
+        
         res = requests.request(
             method,
             f"{self.base_url}/{path}",
