@@ -10,18 +10,20 @@ def read_field(key: str) -> Any:
             fields = json.loads(f.read())
             return fields.get(key, None)
     except:
-        raise Exception(f"Field {key} is not set. You need to do additional configuration to run this command")
+        return None
 
 
 def set_field(key: str, value: Any) -> None:
-    with open(filename, "r") as f:
-        try:
-            fields = json.loads(f.read())
-        except:
-            fields = {}
-        f.close()
-
-    with open(filename, "w") as f:
+    try:
+        with open(filename, "r") as f:
+            try:
+                fields = json.loads(f.read())
+            except:
+                fields = {}
+            f.close()
+    except:
+        fields = {}
+    with open(filename, "w+") as f:
         fields[key] = value
         data = json.dumps(fields)
         f.write(data)

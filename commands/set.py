@@ -14,6 +14,7 @@ core_api = ApiClient(
 @app.command()
 def organization(organization_id: str):
     organization = core_api.request("GET", f"/organizations/{organization_id}")
+    print(organization)
     if organization.get("id"):
         print(f"[green]successfully set organization to `{organization.get('name')}` ({organization_id})[/green]")
         set_field("organization_id", organization_id)
