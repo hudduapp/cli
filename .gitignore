@@ -1,2 +1,5 @@
 priv_cert.pem
 store.json
+dist
+build
+*.egg-info

@@ -6,4 +6,14 @@ hcli.egg-info/PKG-INFO
 hcli.egg-info/SOURCES.txt
 hcli.egg-info/dependency_links.txt
 hcli.egg-info/entry_points.txt
+hcli.egg-info/requires.txt
 hcli.egg-info/top_level.txt
+hcli/api/__init__.py
+hcli/api/utils.py
+hcli/commands/__init__.py
+hcli/commands/auth.py
+hcli/commands/machines.py
+hcli/commands/set.py
+hcli/commands/stores.py
+hcli/utils/__init__.py
+hcli/utils/permanent_storage.py
