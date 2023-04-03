@@ -5,8 +5,8 @@ import typer
 from rich import print
 from rich.table import Table
 
-from api.utils import ApiClient
-from utils.permanent_storage import read_field
+from hcli.api.utils import ApiClient
+from hcli.utils.permanent_storage import read_field
 
 app = typer.Typer()
 

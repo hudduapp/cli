@@ -1,12 +1,12 @@
 import typer
 from rich import print
 
-from api.utils import ApiClient
-from commands import auth
-from commands import machines
-from commands import set
-from commands import stores
-from utils.permanent_storage import read_field
+from hcli.api.utils import ApiClient
+from hcli.commands import auth
+from hcli.commands import machines
+from hcli.commands import set
+from hcli.commands import stores
+from hcli.utils.permanent_storage import read_field
 
 app = typer.Typer()
 
