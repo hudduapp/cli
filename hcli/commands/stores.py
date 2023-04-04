@@ -3,6 +3,7 @@ from rich import print
 from rich.table import Table
 
 from hcli.api.utils import ApiClient
+from hcli.permissions import auth_required, project_and_org_required
 from hcli.utils.permanent_storage import read_field
 
 app = typer.Typer()
@@ -17,6 +18,8 @@ core_api = ApiClient(
 
 
 def make_store_client(client_id, management_token):
+    auth_required()
+    project_and_org_required()
     return ApiClient(
         f"https://store.huddu.io",
         headers={"X-Client-ID": client_id, "X-Client-Secret": management_token},
@@ -25,6 +28,8 @@ def make_store_client(client_id, management_token):
 
 @app.command()
 def create(name: str = typer.Option(..., prompt=True)):
+    auth_required()
+    project_and_org_required()
     stores_api = ApiClient(
         f"https://store.huddu.io", headers={"Authorization": f"Token {token}"}
     )
@@ -43,6 +48,8 @@ def create(name: str = typer.Option(..., prompt=True)):
 
 @app.command()
 def list(skip: int = 0):
+    auth_required()
+    project_and_org_required()
     res = core_api.request(
         "GET",
         f"/search?resource=resources&organization={organization_id}&q=type:store%20$and%20project:{project_id}&limit=10&skip={skip}",
@@ -69,6 +76,8 @@ def list(skip: int = 0):
 
 @app.command()
 def info(store_name: str, show_management_token: bool = False):
+    auth_required()
+    project_and_org_required()
     res = core_api.request(
         "GET",
         f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1",
@@ -83,6 +92,8 @@ def info(store_name: str, show_management_token: bool = False):
 
 @app.command()
 def entries_get(store_name: str, key: str):
+    auth_required()
+    project_and_org_required()
     res = core_api.request(
         "GET",
         f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1",
@@ -106,6 +117,8 @@ def entries_set(
         key: str,
         value: str = typer.Option(..., prompt=True),
 ):
+    auth_required()
+    project_and_org_required()
     res = core_api.request(
         "GET",
         f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1",
@@ -133,6 +146,8 @@ def entries_update(
         key: str,
         value: str = typer.Option(..., prompt=True),
 ):
+    auth_required()
+    project_and_org_required()
     res = core_api.request(
         "GET",
         f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1",
@@ -150,6 +165,8 @@ def entries_update(
 
 @app.command()
 def entries_delete(store_name: str, key: str):
+    auth_required()
+    project_and_org_required()
     res = core_api.request(
         "GET",
         f"/search?resource=resources&organization={organization_id}&q=type:store $and project:{project_id} $and name:{store_name}&limit=1",
@@ -170,6 +187,8 @@ def delete(
         store_name: str,
         confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
 ):
+    auth_required()
+    project_and_org_required()
     if confirm_deletion == "y":
         res = core_api.request(
             "GET",
