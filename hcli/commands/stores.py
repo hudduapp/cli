@@ -3,8 +3,8 @@ from rich import print
 from rich.table import Table
 
 from hcli.api.utils import ApiClient
-from hcli.permissions import auth_required, project_and_org_required
 from hcli.utils.permanent_storage import read_field
+from hcli.utils.permissions import auth_required, project_and_org_required
 
 app = typer.Typer()
 
@@ -113,9 +113,9 @@ def entries_get(store_name: str, key: str):
 
 @app.command()
 def entries_set(
-        store_name: str,
-        key: str,
-        value: str = typer.Option(..., prompt=True),
+    store_name: str,
+    key: str,
+    value: str = typer.Option(..., prompt=True),
 ):
     auth_required()
     project_and_org_required()
@@ -142,9 +142,9 @@ def entries_set(
 
 @app.command()
 def entries_update(
-        store_name: str,
-        key: str,
-        value: str = typer.Option(..., prompt=True),
+    store_name: str,
+    key: str,
+    value: str = typer.Option(..., prompt=True),
 ):
     auth_required()
     project_and_org_required()
@@ -184,8 +184,8 @@ def entries_delete(store_name: str, key: str):
 
 @app.command()
 def delete(
-        store_name: str,
-        confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
+    store_name: str,
+    confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
 ):
     auth_required()
     project_and_org_required()

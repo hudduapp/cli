@@ -6,8 +6,10 @@ from rich import print
 from rich.table import Table
 
 from hcli.api.utils import ApiClient
-from hcli.permissions import auth_required, project_and_org_required
-from hcli.utils.permanent_storage import read_field
+from hcli.utils.permanent_storage import read_field, dir_path
+from hcli.utils.permissions import auth_required, project_and_org_required
+
+priv_cert_path = dir_path + "/priv_cert.pem"
 
 app = typer.Typer()
 
@@ -36,11 +38,11 @@ class Region(str, Enum):
 
 @app.command()
 def create(
-        name: str = typer.Option(..., prompt=True),
-        region: Region = typer.Option(..., show_choices=True, prompt=True),
-        machine_type: MachineType = typer.Option(..., show_choices=True, prompt=True),
-        hostname: str = typer.Option(..., prompt=True),
-        disk_size: int = typer.Option(..., prompt=True),
+    name: str = typer.Option(..., prompt=True),
+    region: Region = typer.Option(..., show_choices=True, prompt=True),
+    machine_type: MachineType = typer.Option(..., show_choices=True, prompt=True),
+    hostname: str = typer.Option(..., prompt=True),
+    disk_size: int = typer.Option(..., prompt=True),
 ):
     auth_required()
     project_and_org_required()
@@ -82,13 +84,20 @@ def list(skip: int = 0):
     table = Table()
 
     table.add_column("Name")
+    table.add_column("Status")
     table.add_column("Machine ID")
     table.add_column("Machine IP")
     table.add_column("Machine Type")
 
     for i in res.get("data"):
         table.add_row(
-            i.get("name"), i.get("id"), i.get("external_ip"), i.get("machine_type")
+            i.get("name"),
+            f"[green]{i.get('status')}"
+            if i.get("status") == "running"
+            else i.get("status"),
+            i.get("id"),
+            i.get("external_ip"),
+            i.get("machine_type"),
         )
 
     if len(res.get("data")):
@@ -113,12 +122,13 @@ def connect(machine_name: str):
             f"[red]Machine needs to be running but is in state: {machine_resource.get('status')}[/red]"
         )
     else:
-        with open("priv_cert.pem", "w") as f:
+        os.system(f"sudo rm {priv_cert_path}")
+        with open(priv_cert_path, "w") as f:
             f.write(machine_resource["ssh"]["private_cert"])
             f.close()
 
-        os.system("chmod 400 priv_cert.pem")
-        os.system(f"ssh -i priv_cert.pem admin@{machine_resource['external_ip']}")
+        os.system(f"sudo chmod 400 {priv_cert_path}")
+        os.system(f"ssh -i {priv_cert_path} admin@{machine_resource['external_ip']}")
 
         print("Closed terminal session")
 
@@ -181,8 +191,8 @@ def resume(machine_name: str):
 
 @app.command()
 def delete(
-        machine_name: str,
-        confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
+    machine_name: str,
+    confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
 ):
     auth_required()
     project_and_org_required()

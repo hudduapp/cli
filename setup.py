@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hcli",
-    version="1.0.8",
+    version="1.0.9",
     packages=["hcli", "hcli.commands", "hcli.api", "hcli.utils"],
     url="https://github.com/hudduapp/cli",
     install_requires=["typer", "rich", "huddu"],
