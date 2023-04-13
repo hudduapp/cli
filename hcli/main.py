@@ -6,6 +6,7 @@ from hcli.commands import auth
 from hcli.commands import machines
 from hcli.commands import organizations
 from hcli.commands import projects
+from hcli.commands import queues
 from hcli.commands import set
 from hcli.commands import stores
 from hcli.utils.permanent_storage import read_field
@@ -14,6 +15,7 @@ app = typer.Typer()
 
 app.add_typer(organizations.app, name="organizations")
 app.add_typer(projects.app, name="projects")
+app.add_typer(queues.app, name="queues")
 app.add_typer(stores.app, name="stores")
 app.add_typer(set.app, name="set")
 app.add_typer(machines.app, name="machines")
