@@ -10,7 +10,5 @@ setup(
     author="Joshua3212",
     author_email="hello@huddu.io",
     description="Official CLI for huddu.io",
-    entry_points={
-        'console_scripts': ['hcli=hcli.main:app']
-    },
+    entry_points={"console_scripts": ["hcli=hcli.main:app"]},
 )

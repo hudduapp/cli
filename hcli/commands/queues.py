@@ -91,7 +91,9 @@ def info(queue_name: str, show_management_token: bool = False):
 
 
 @app.command()
-def events_pull(queue_name: str, topic: str = typer.Option(..., prompt=True), limit: int = 5):
+def events_pull(
+    queue_name: str, topic: str = typer.Option(..., prompt=True), limit: int = 5
+):
     auth_required()
     project_and_org_required()
     res = core_api.request(
@@ -114,9 +116,9 @@ def events_pull(queue_name: str, topic: str = typer.Option(..., prompt=True), li
 
 @app.command()
 def entries_push(
-        queue_name: str,
-        topic: str = typer.Option(..., prompt=True),
-        event: str = typer.Option(..., prompt=True),
+    queue_name: str,
+    topic: str = typer.Option(..., prompt=True),
+    event: str = typer.Option(..., prompt=True),
 ):
     auth_required()
     project_and_org_required()
@@ -156,8 +158,8 @@ def events_acknowledge(queue_name: str, event_id: str = typer.Option(..., prompt
 
 @app.command()
 def delete(
-        queue_name: str,
-        confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
+    queue_name: str,
+    confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
 ):
     auth_required()
     project_and_org_required()
