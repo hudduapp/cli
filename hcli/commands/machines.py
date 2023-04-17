@@ -27,8 +27,7 @@ machines_api = ApiClient(
 
 
 class MachineType(str, Enum):
-    dedicated_cpu_x1 = "dedicated-cpu-x1"
-    dedicated_cpu_x2 = "dedicated-cpu-x2"
+    small_1 = "small-1"
 
 
 class Region(str, Enum):
@@ -38,11 +37,11 @@ class Region(str, Enum):
 
 @app.command()
 def create(
-    name: str = typer.Option(..., prompt=True),
-    region: Region = typer.Option(..., show_choices=True, prompt=True),
-    machine_type: MachineType = typer.Option(..., show_choices=True, prompt=True),
-    hostname: str = typer.Option(..., prompt=True),
-    disk_size: int = typer.Option(..., prompt=True),
+        name: str = typer.Option(..., prompt=True),
+        region: Region = typer.Option(..., show_choices=True, prompt=True),
+        machine_type: MachineType = typer.Option(..., show_choices=True, prompt=True),
+        hostname: str = typer.Option(..., prompt=True),
+        disk_size: int = typer.Option(..., prompt=True),
 ):
     auth_required()
     project_and_org_required()
@@ -191,8 +190,8 @@ def resume(machine_name: str):
 
 @app.command()
 def delete(
-    machine_name: str,
-    confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
+        machine_name: str,
+        confirm_deletion: str = typer.Option(..., prompt="Are you sure? (y/n)"),
 ):
     auth_required()
     project_and_org_required()
