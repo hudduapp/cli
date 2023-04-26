@@ -17,15 +17,6 @@ def auth_required():
         sys.exit()
 
 
-def project_and_org_required():
-    if not project_id or not organization_id:
-        print(
-            "[red]Please set a project and organization first. You can do so via [bold]hcli projects set[/bold] "
-            "and [bold]hcli organizations set[/bold][/red]"
-        )
-        sys.exit()
-
-
 def org_required():
     if not organization_id:
         print(

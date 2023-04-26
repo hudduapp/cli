@@ -1,0 +1,12 @@
+prebuilts:
+  - autoscaler
+  - loadbalancer
+  - autobuild
+
+app: demoApp
+
+machines:
+  - testName:
+      type: small-1
+      disk_size: 10
+      entrypoint: cd /; ls -l

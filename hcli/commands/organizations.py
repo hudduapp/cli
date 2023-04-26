@@ -11,7 +11,8 @@ token = read_field("token")
 organization_id = read_field("organization_id")
 
 core_api = ApiClient(
-    "https://api.huddu.io", headers={"Authorization": f"Token {token}"}
+    "https://public-api-duqqqjtkbq-uc.a.run.app",
+    headers={"Authorization": f"Token {token}"},
 )
 
 
@@ -32,7 +33,7 @@ def list():
 @app.command()
 def set(organization_name: str):
     organizations = core_api.request(
-        "GET", f"/search?resources=organizations&q=name:{organization_name}"
+        "GET", f"/organizations/search?name={organization_name}"
     )
     if len(organizations.get("data")) == 0:
         print(f"[red]no organization for name {organization_name} found")

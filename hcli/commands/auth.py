@@ -9,7 +9,8 @@ from hcli.utils.permanent_storage import read_field, set_field, unset_field
 app = typer.Typer()
 
 core_api = ApiClient(
-    "https://api.huddu.io", headers={"Authorization": f"Token {read_field('token')}"}
+    "https://public-api-duqqqjtkbq-uc.a.run.app",
+    headers={"Authorization": f"Token {read_field('token')}"},
 )
 
 auth_api = ApiClient(

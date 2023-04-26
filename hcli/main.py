@@ -2,24 +2,20 @@ import typer
 from rich import print
 
 from hcli.api.utils import ApiClient
+from hcli.commands import apps
 from hcli.commands import auth
 from hcli.commands import machines
 from hcli.commands import organizations
-from hcli.commands import projects
-from hcli.commands import queues
 from hcli.commands import set
-from hcli.commands import stores
 from hcli.utils.permanent_storage import read_field
 
 app = typer.Typer()
 
 app.add_typer(organizations.app, name="organizations")
-app.add_typer(projects.app, name="projects")
-app.add_typer(queues.app, name="queues")
-app.add_typer(stores.app, name="stores")
 app.add_typer(set.app, name="set")
-app.add_typer(machines.app, name="machines")
+app.add_typer(apps.app, name="apps")
 app.add_typer(auth.app, name="auth")
+app.add_typer(machines.app, name="machines")
 
 
 @app.command()
@@ -28,7 +24,7 @@ def info():
     organization_id = read_field("organization_id")
 
     core_api = ApiClient(
-        "https://api.huddu.io",
+        "https://public-api-duqqqjtkbq-uc.a.run.app",
         headers={"Authorization": f"Token {read_field('token')}"},
     )
 
