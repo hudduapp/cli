@@ -1,12 +1,9 @@
-prebuilts:
-  - autoscaler
-  - loadbalancer
-  - autobuild
-
-app: demoApp
+app: test12
 
 machines:
   - testName:
-      type: small-1
+      machine_type: small-1
       disk_size: 10
-      entrypoint: cd /; ls -l
+      run: echo "hello world"
+
+strategy: recreate

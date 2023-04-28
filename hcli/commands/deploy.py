@@ -1,13 +1,13 @@
-import json
+import os
+import sys
 
-import requests
 import typer
+import yaml
 from rich import print
-from rich.table import Table
 
 from hcli.api.utils import ApiClient
+from hcli.utils.machines import get_machines_for_an_app, delete_machine, create_machine
 from hcli.utils.permanent_storage import read_field, dir_path
-from hcli.utils.permissions import auth_required, org_required
 
 priv_cert_path = dir_path + "/priv_cert.pem"
 
@@ -22,47 +22,78 @@ core_api = ApiClient(
 )
 
 
-def create_machine(
-    base_url: str, organization: str, app: str, machine_config: dict
-) -> None:
-    machine_config["app"] = app
-    requests.request(
-        "POST",
-        base_url + f"/organizations/{organization}/machines",
-        data=json.dumps(machine_config),
-        headers={"Authorization": f"Token {token}"},
+def get_app(app: str) -> dict:
+    try:
+        return core_api.request(
+            "POST", f"/organizations/{organization_id}/apps/search?limit=1&name={app}"
+        )["data"][0]
+    except:
+        print(
+            f"[red]couldn't find app with name [bold]{app}[/bold]. Make sure it exists by checking with [bold]hcli apps list[/bold][/red]"
+        )
+        sys.exit()
+
+
+def deploy_to_app(filename: str = "huddu.yml") -> None:
+    dir = os.getcwd()
+    full_filename = f"{dir}/{filename}"
+
+    with open(full_filename, "r") as f:
+        configfile = yaml.safe_load(f.read())
+
+    print("[green]Looking for your app...[/green]")
+    app = get_app(configfile["app"])
+    print(
+        f"Found {app['name']}({app['id']}). Do you want to deploy to this application?"
     )
+    if not typer.prompt("Are you sure? (y/n)") == "y":
+        print("[red]Exiting...[/red]")
+        sys.exit()
 
-
-@app.command()
-def deploy():
-    auth_required()
-    org_required()
-    res = core_api.request(
-        "GET",
-        f"organizations/{organization_id}/resources/search?type=machine&limit=10&skip={skip}",
+    to_delete = list(
+        get_machines_for_an_app(app["id"], params={"meta.delete_on_redeploy": "true"})
     )
+    if configfile.get("strategy", "blue/green").lower() == "recreate":
+        print("Selected deployment strategy is recreate")
+        print("Starting to delete machines")
+        for i in to_delete:
+            print(f"--- Deleting {i['name']} ({i['id']})")
+            delete_machine(region=i["region"], instance_id=i["id"])
+        print("Done deleting machines")
 
-    table = Table()
+    print("[green]Trying to deploy your machines![/green]")
 
-    table.add_column("Name")
-    table.add_column("Status")
-    table.add_column("Machine ID")
-    table.add_column("Machine IP")
-    table.add_column("Machine Type")
+    machines = configfile.get("machines") if configfile.get("machines") else []
 
-    for i in res.get("data"):
-        table.add_row(
-            i.get("name"),
-            f"[green]{i.get('status')}"
-            if i.get("status") == "running"
-            else i.get("status"),
-            i.get("id"),
-            i.get("external_ip"),
-            i.get("machine_type"),
+    print(f"--- {len(machines)} to go...")
+    for i in machines:
+        print(
+            f"--- Starting to deploy machine for name [bold]{list(i.keys())[0]}[/bold]"
         )
 
-    if len(res.get("data")):
-        print(table)
-    else:
-        print("No entries. You can create a new machine with huddu machines create")
+        machine_info = list(i.values())[0]
+        if not machine_info.get("region"):
+            print("--- [yellow]No region set! Defaulting to us-central[/yellow]")
+
+        create_machine(
+            region=machine_info.get("region", "us-central"),
+            app=app["id"],
+            name=list(i.keys())[0],
+            machine_type=machine_info.get("machine_type", "small-1"),
+            disk_size=machine_info.get("disk_size", 10),
+            meta={"delete_on_redeploy": i.get("delete_on_redeploy", True)},
+        )
+        configfile["machines"].remove(i)
+        print(f"--- {len(machines)} more machines to go...")
+
+    if configfile.get("strategy", "blue/green").lower() == "blue/green":
+        print("Selected deployment strategy is blue/green")
+        print("Starting to delete machines")
+        for i in to_delete:
+            print(f"--- Deleting {i['name']} ({i['id']})")
+            delete_machine(region=i["region"], instance_id=i["id"])
+        print("Done deleting machines")
+    print("[green]done![/green]")
+    print(
+        "Need more info about this deployment? Check the dashboard: https://huddu.io/app"
+    )

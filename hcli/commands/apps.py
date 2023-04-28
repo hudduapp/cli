@@ -3,6 +3,7 @@ from rich import print
 from rich.table import Table
 
 from hcli.api.utils import ApiClient
+from hcli.utils.machines import get_machines_for_an_app, get_machine_api_client
 from hcli.utils.permanent_storage import read_field, dir_path
 from hcli.utils.permissions import auth_required, org_required
 
@@ -46,7 +47,7 @@ def list(skip: int = 0):
 
 
 @app.command()
-def get(app_name: str, skip: int = 0):
+def info(app_name: str, skip: int = 0):
     auth_required()
     org_required()
     res = core_api.request(
@@ -61,6 +62,7 @@ def get(app_name: str, skip: int = 0):
     )
 
     print(f"You're viewing instances for [bold]{app['name']}[/bold]:")
+    print("loading...")
 
     table = Table()
 
@@ -71,6 +73,10 @@ def get(app_name: str, skip: int = 0):
     table.add_column("External Ip")
 
     for i in instances.get("data"):
+        i = get_machine_api_client(i.get("api_endpoint")).request(
+            "GET", f"/organizations/{organization_id}/machines/{i.get('id')}"
+        )
+
         table.add_row(
             i.get("name"),
             f"[green]{i.get('status')}"
@@ -85,3 +91,25 @@ def get(app_name: str, skip: int = 0):
         print(table)
     else:
         print("No instances.")
+
+
+@app.command()
+def delete_machines(app_name: str, skip: int = 0):
+    auth_required()
+    org_required()
+    res = core_api.request(
+        "GET",
+        f"/organizations/{organization_id}/apps/search?limit=1&name={app_name}",
+    )
+
+    app = res.get("data")[0]
+
+    print(
+        f"[yellow]This action might take a few seconds per machine (fell free to grab a coffee!)[/yellow]"
+    )
+    for i in get_machines_for_an_app(app["id"]):
+        api = get_machine_api_client(i["api_endpoint"])
+        api.request("DELETE", f"/organizations/{organization_id}/machines/{i['id']}")
+        print(
+            f"[red]Deleted machine with internal name [bold]{i['internal_name']}[/bold][/red]"
+        )
