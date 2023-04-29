@@ -1,9 +1,0 @@
-app: test12
-
-machines:
-  - testName:
-      machine_type: small-1
-      disk_size: 10
-      run: echo "hello world"
-
-strategy: recreate

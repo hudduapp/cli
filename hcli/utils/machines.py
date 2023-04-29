@@ -32,34 +32,48 @@ def get_machines_for_an_app(app_id: str, params: dict = {}):
             yield i
 
 
-def create_machine(
-    region: str,
-    app: str,
-    name: str = None,
-    machine_type: str = "us-central",
-    disk_size: int = 10,
-    meta: dict = {},
-):
-    region_base_url = config.regions[region]
-    machines_api = get_machine_api_client(base_url=region_base_url)
+class Machine:
+    def __init__(self, region: str):
+        self.base_url = config.regions[region]
+        self.machines_api = get_machine_api_client(base_url=self.base_url)
 
-    machines_api.request(
-        "POST",
-        f"/organizations/{organization_id}/machines",
-        body={
-            "name": name,
-            "app": app,
-            "machine_type": machine_type,
-            "disk_size": disk_size,
-            "meta": meta,
-        },
-    )
+    def create(
+        self,
+        app: str,
+        name: str = None,
+        machine_type: str = "us-central",
+        disk_size: int = 10,
+        meta: dict = {},
+    ):
+        self.machines_api.request(
+            "POST",
+            f"organizations/{organization_id}/machines",
+            body={
+                "name": name,
+                "app": app,
+                "machine_type": machine_type,
+                "disk_size": disk_size,
+                "meta": meta,
+            },
+        )
 
+    def delete(self, instance_id: str):
+        self.machines_api.request(
+            "DELETE", f"organizations/{organization_id}/machines/{instance_id}"
+        )
 
-def delete_machine(region: str, instance_id: str):
-    region_base_url = config.regions[region]
-    machines_api = get_machine_api_client(base_url=region_base_url)
+    def get_info(self, instance_id: str) -> dict:
+        return self.machines_api.request(
+            "GET", f"organizations/{organization_id}/machines/{instance_id}"
+        )
 
-    machines_api.request(
-        "DELETE", f"/organizations/{organization_id}/machines/{instance_id}"
-    )
+    def run_command(
+        self, instance_id: str, command: str, no_exit_on_error: bool = False
+    ) -> dict:
+        res = self.machines_api.request(
+            "POST",
+            f"organizations/{organization_id}/machines/{instance_id}/run_command",
+            body={"command": command},
+            no_exit_on_error=no_exit_on_error,
+        )
+        return res

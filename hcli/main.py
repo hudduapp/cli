@@ -9,18 +9,17 @@ from hcli.commands.deploy import deploy_to_app
 
 app = typer.Typer()
 
+
+@app.command()
+def deploy(filename: str = "huddu.yml"):
+    deploy_to_app(filename)
+
+
 app.add_typer(organizations.app, name="organizations")
 app.add_typer(set.app, name="set")
 app.add_typer(apps.app, name="apps")
 app.add_typer(auth.app, name="auth")
 app.add_typer(machines.app, name="machines")
-
-
-# more commands
-@app.command()
-def deploy(filename: str = "huddu.yml"):
-    deploy_to_app(filename)
-
 
 if __name__ == "__main__":
     app()

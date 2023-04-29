@@ -10,7 +10,12 @@ class ApiClient:
         self.headers = headers
 
     def request(
-        self, method: str, path: str, body: dict = None, params: dict = None
+        self,
+        method: str,
+        path: str,
+        body: dict = None,
+        params: dict = None,
+        no_exit_on_error: bool = False,
     ) -> dict:
         """
         This should handle errors fairly well
@@ -30,6 +35,8 @@ class ApiClient:
 
         if res.status_code < 300:
             return res.json()
+        elif no_exit_on_error:
+            raise Exception(res.text)
         else:
             print("Something went wrong! Here are some clues:")
             try:

@@ -1,10 +1,9 @@
-from getpass import getpass
-
 import typer
-from rich import print
 
 from hcli.api.utils import ApiClient
 from hcli.utils.permanent_storage import read_field, set_field, unset_field
+from hcli.utils.terminal.prompt import password_prompt
+from hcli.utils.terminal.render import print
 
 app = typer.Typer()
 
@@ -28,7 +27,7 @@ def login():
         )
     else:
         login = input("Login: ")
-        password = getpass("Password: ")
+        password = password_prompt("Password: ")
 
         res = auth_api.request(
             "POST", "/login", body={"login": login, "password": password}

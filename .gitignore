@@ -3,3 +3,4 @@ store.json
 dist
 build
 *.egg-info
+huddu.yml
