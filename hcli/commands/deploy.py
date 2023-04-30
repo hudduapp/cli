@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import uuid
 
@@ -26,8 +27,8 @@ core_api = ApiClient(
 def generate_command(custom_command: str):
     command = ""
     # install some requirements (incl. metrics)
-    command += "sudo apt-get install atop; "
-    command += f"nohup sudo {custom_command} > /home/admin/out.txt &"
+    #    command += "nohup sudo apt-get install atop & ; "
+    command += f"nohup sudo {custom_command} > /home/admin/out.txt &;exit"
 
     return command
 
@@ -38,9 +39,12 @@ def deploy_to_app(filename: str = "huddu.yml") -> None:
     dir = os.getcwd()
     full_filename = f"{dir}/{filename}"
     deployment_id = str(uuid.uuid4())
-    with open(full_filename, "r") as f:
-        configfile = yaml.safe_load(f.read())
-
+    try:
+        with open(full_filename, "r") as f:
+            configfile = yaml.safe_load(f.read())
+    except:
+        print("Couldn't find you deployment file. Please check your directory")
+        sys.exit()
     # search the app to which to deploy
     app = get_app(configfile["app"])
 
@@ -67,6 +71,7 @@ def deploy_to_app(filename: str = "huddu.yml") -> None:
 
     # create machines
     for i in machines_to_create:
+
         machine_status = list(i.values())[0]
         machine = Machine(machine_status.get("region", "us-central"))
         # default region to us-central
@@ -86,8 +91,6 @@ def deploy_to_app(filename: str = "huddu.yml") -> None:
                 "command": generate_command(machine_status.get("run", None)),
             },
         )
-
-        configfile["machines"].remove(i)
 
     if configfile.get("strategy", "blue/green").lower() == "blue/green":
         for i in to_delete:
